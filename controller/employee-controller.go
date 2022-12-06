@@ -10,28 +10,31 @@ import (
 
 type EmployeeController interface {
 	GetAll() []entity.Employee
-	Add(ctx *gin.Context) entity.Employee
+	Add(ctx *gin.Context) error
 }
 
-type controller struct {
+type employeeController struct {
 	service service.EmployeeService
 }
 
-func New(service service.EmployeeService) EmployeeController {
-	return &controller{
+func NewEmployee(service service.EmployeeService) EmployeeController {
+	return &employeeController{
 		service: service,
 	}
 }
 
-func (c *controller) GetAll() []entity.Employee {
+func (c *employeeController) GetAll() []entity.Employee {
 	fmt.Println("getAll employee at controller")
 	return c.service.GetAll()
 }
 
-func (c *controller) Add(ctx *gin.Context) entity.Employee {
+func (c *employeeController) Add(ctx *gin.Context) error {
 	fmt.Println("employee added at controller")
 	var employee entity.Employee
-	ctx.BindJSON(&employee)
+	err := ctx.ShouldBindJSON(&employee)
+	if err != nil {
+		return err
+	}
 	c.service.Add(employee)
-	return employee
+	return nil
 }
